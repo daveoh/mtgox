@@ -40,7 +40,8 @@ module MtGox
     # param currency [Symbol] currency conversion rule to use amongst [:btc, :usd, :jpy]
     # return an int
     def intify(decimal, currency)
-      (decimal * INT_MULTIPLIERS[currency]).to_i
+      multiple = INT_MULTIPLIERS[currency] || INT_MULTIPLIERS[:usd]
+      (decimal * multiple).to_i
     end
 
     # Convert an int value to a decimal using the MtGox conversion rules.
@@ -49,7 +50,8 @@ module MtGox
     # param currency [Symbol] currency conversion rule to use amongst [:btc, :usd, :jpy]
     # return a [BigDecimal]
     def decimalify(int, currency)
-      (BigDecimal(int.to_s) / INT_MULTIPLIERS[currency])
+      multiple = INT_MULTIPLIERS[currency] || INT_MULTIPLIERS[:usd]
+      (BigDecimal(int.to_s) / multiple)
     end
   end
 end

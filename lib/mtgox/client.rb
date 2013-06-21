@@ -51,8 +51,9 @@ module MtGox
     # @return [MtGox::Ticker]
     # @example
     #   MtGox.ticker
-    def ticker
-      ticker = get('/api/1/BTCUSD/ticker')
+    def ticker(currency = nil)
+      currency = currency_name(currency)
+      ticker = get("/api/1/#{currency}/ticker")
       Ticker.instance.buy    = value_currency ticker['buy']
       Ticker.instance.high   = value_currency ticker['high']
       Ticker.instance.price  = value_currency ticker['last_all']
@@ -83,8 +84,9 @@ module MtGox
     # @return [Hash] with keys :asks and :bids, which contain arrays as described in {MtGox::Client#asks} and {MtGox::Clients#bids}
     # @example
     #   MtGox.offers
-    def offers
-      offers = get('/api/1/BTCUSD/depth/fetch')
+    def offers(currency = nil)
+      currency = currency_name(currency)
+      offers = get("/api/1/#{currency}/depth/fetch")
       asks = offers['asks'].sort_by do |ask|
         ask['price_int'].to_i
       end.map! do |ask|
@@ -145,8 +147,9 @@ module MtGox
     # @example
     #   MtGox.trades
     #   MtGox.trades :since => 12341234
-    def trades(opts={})
-      get('/api/1/BTCUSD/trades/fetch', opts).
+    def trades(opts={}, currency = nil)
+      currency = currency_name(currency)
+      get("/api/1/#{currency}/trades/fetch", opts).
         sort_by{|trade| trade['date']}.map do |trade|
         Trade.new(trade)
       end
@@ -257,12 +260,14 @@ module MtGox
     # @example
     #   # Sell one bitcoin for $123
     #   MtGox.add_order! :sell, 1.0, 123.0
-    def order!(type, amount, price)
+    def order!(type, amount, price, currency = nil)
+      currency = currency_name(currency)
       order = {type: order_type(type), amount_int: intify(amount,:btc)}
       if price != :market
-          order[:price_int] = intify(price, :usd)
+          currency ||= MtGox.currency
+          order[:price_int] = intify(price, currency)
       end
-      post('/api/1/BTCUSD/order/add', order)
+      post("/api/1/#{currency}/order/add", order)
     end
     alias add_order! order!
     alias addorder! order!
@@ -284,7 +289,8 @@ module MtGox
     #     my_order = MtGox.orders.first
     #     MtGox.cancel my_order
     #     MtGox.cancel {'oid' => '1234567890'}
-    def cancel(args)
+    def cancel(args, currency = nil)
+      currency = currency_name(currency)
       if args.is_a?(Hash)
         args = args['oid']
       end
@@ -292,7 +298,7 @@ module MtGox
       orders = post('/api/1/generic/orders')
       order = orders.find{|order| order['oid'] == args.to_s}
       if order
-        res = post('/api/1/BTCUSD/order/cancel', oid: order['oid'])
+        res = post("/api/1/#{currency}/order/cancel", oid: order['oid'])
         orders.delete_if{|o| o['oid'] == res['oid']}
         parse_orders(orders)
       else
@@ -318,6 +324,13 @@ module MtGox
       else
         post('/api/1/generic/bitcoin/send_simple', {amount_int: intify(amount, :btc), address: address})['trx']
       end
+    end
+
+  protected
+    # :usd => "#{currency}
+    def currency_name(symbol=nil)
+      symbol ||= MtGox.currency
+      "BTC#{symbol.upcase}"
     end
 
   private
