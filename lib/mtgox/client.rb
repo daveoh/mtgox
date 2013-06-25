@@ -172,6 +172,33 @@ module MtGox
       parse_orders(post('/api/1/generic/orders'))
     end
 
+    # Fetch your wallet history, both buys and sells, for network efficiency
+    #
+    # @authenticated true
+    # @return [Hash] with keys :buys and :sells, which contain arrays as described in {MtGox::Client#buys} and {MtGox::Clients#sells}
+    # @example
+    #   MtGox.history
+    # parameters : currency, type, date_start, date_end, trade_id, page
+    # valid values for the "type" parameter are : 'in','out','spent','earned','fee','deposit','withdraw' allowing you to filter on one type of transactions
+    def history(currency, type = nil, date_end = nil, date_start = nil, trade_id = nil)
+      params = {currency: currency}
+      params.merge!( {type: type} ) if type
+      params.merge!( {date_end: date_end} ) if date_end
+      params.merge!( {date_start: date_start} ) if date_start
+      params.merge!( {trade_id: trade_id} ) if trade_id
+      post('/api/1/generic/wallet/history', )
+    end
+
+    # Return Order result
+    #
+    # @authenticated true
+    # @return [Hash] with keys :buys and :sells, which contain arrays as described in {MtGox::Client#buys} and {MtGox::Clients#sells}
+    # @example
+    #   MtGox.history
+    def order_result
+      post('/api/1/generic/private/order/result')
+    end
+
     # Fetch your open buys
     #
     # @authenticated true
