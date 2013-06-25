@@ -194,9 +194,11 @@ module MtGox
     # @authenticated true
     # @return [Hash] with keys :buys and :sells, which contain arrays as described in {MtGox::Client#buys} and {MtGox::Clients#sells}
     # @example
+    # type ( bid or ask ) and order (the order id)
     #   MtGox.history
-    def order_result
-      post('/api/1/generic/private/order/result')
+    def order_result(type, order_id)
+      order = {type: order_type(type), order: order_id}
+      post('/api/1/generic/private/order/result', order)
     end
 
     # Fetch your open buys
