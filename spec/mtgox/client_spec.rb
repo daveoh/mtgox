@@ -373,6 +373,56 @@ describe MtGox::Client do
     end
   end
 
+  describe "#history" do
+    before do
+      body = test_body({"currency" => "BTC"})
+      stub_post('/api/1/generic/wallet/history').
+        with(body: body, headers: test_headers(@client, body)).
+        to_return(body: fixture('history.json'))
+    end
+
+    it "fetches history" do
+      history = @client.history("BTC")
+      body = test_body({"currency" => "BTC"})
+      expect(a_post("/api/1/generic/wallet/history")
+              .with(body: body, headers: test_headers(@client, body)))
+              .to have_been_made
+      expect(history).to eq(
+        "records"=>"1",
+        "result"=>[
+          {
+            "Index"=>"1",
+            "Date"=>1384536197,
+            "Type"=>"deposit",
+            "Value"=>{
+              "value"=>"1.00000000",
+              "value_int"=>"100000000",
+              "display"=>"1.00000000 BTC",
+              "display_short"=>"1.00 BTC",
+              "currency"=>"BTC"
+            },
+            "Balance"=>{
+              "value"=>"1.00000000",
+              "value_int"=>"100000000",
+              "display"=>"1.00000000 BTC",
+              "display_short"=>"1.00 BTC",
+              "currency"=>"BTC"
+            },
+            "Info"=>"1AAXCcSjgsgoTnQLqUfPh7qRsUyvbYSbGW",
+            "Link"=>[
+              "3cdb1d0b-9d70-45cb-b1dc-3fb44045af6e",
+              "Money_Bitcoin_Block_Tx_Out",
+              "24f23af8-f1e7-44c3-aa82-a97878385479:!"
+            ]
+          }
+        ],
+        "current_page"=>1,
+        "max_page"=>1,
+        "max_results"=>50
+      )
+    end
+  end
+
   describe "nonce_type" do
     before do
       stub_post('/api/1/generic/bitcoin/address').
