@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'helper'
 
 describe MtGox::Client do
@@ -397,15 +398,15 @@ describe MtGox::Client do
             "Value"=>{
               "value"=>"1.00000000",
               "value_int"=>"100000000",
-              "display"=>"1.00000000 BTC",
-              "display_short"=>"1.00 BTC",
+              "display"=>"1.00000000 BTC",
+              "display_short"=>"1.00 BTC",
               "currency"=>"BTC"
             },
             "Balance"=>{
               "value"=>"1.00000000",
               "value_int"=>"100000000",
-              "display"=>"1.00000000 BTC",
-              "display_short"=>"1.00 BTC",
+              "display"=>"1.00000000 BTC",
+              "display_short"=>"1.00 BTC",
               "currency"=>"BTC"
             },
             "Info"=>"1AAXCcSjgsgoTnQLqUfPh7qRsUyvbYSbGW",
