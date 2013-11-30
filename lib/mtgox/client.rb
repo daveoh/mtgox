@@ -13,6 +13,7 @@ require 'mtgox/trade'
 require 'mtgox/value'
 require 'mtgox/lag'
 require 'mtgox/configuration'
+require 'mtgox/order_result'
 
 module MtGox
   class Client
@@ -153,6 +154,16 @@ module MtGox
         sort_by{|trade| trade['date']}.map do |trade|
         Trade.new(trade)
       end
+    end
+
+    # Fetch API rights
+    #
+    # @authenticated true
+    # @return [Array<String>] an array of strings
+    # @example
+    #   MtGox.rights
+    def rights
+      post("/api/1/generic/info")["Rights"]
     end
 
     # Fetch your current balance
@@ -326,7 +337,17 @@ module MtGox
       end
     end
 
-  protected
+    # Fetch information about a particular transaction
+    #
+    # @authenticated true
+    # @param offer_type [String] 'bid' or 'ask'
+    # @param order_id [String] the order id
+    # @return [OrderResult]
+    def order_result(offer_type, order_id)
+      OrderResult.new(post('/api/1/generic/order/result', {type: offer_type, order: order_id}))
+    end
+
+      protected
     # :usd => "#{currency}
     def currency_name(symbol=nil)
       symbol ||= MtGox.currency

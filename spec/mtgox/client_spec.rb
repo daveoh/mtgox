@@ -185,6 +185,20 @@ describe MtGox::Client do
     end
   end
 
+  describe "#rights" do
+    before do
+      stub_post('/api/1/generic/info').
+        with(body: test_body, headers: test_headers(@client)).
+        to_return(body: fixture('info.json'))
+    end
+
+    it "fetches the array of API permissions" do
+      rights = @client.rights
+      expect(a_post("/api/1/generic/info").with(body: test_body, headers: test_headers(@client))).to have_been_made
+      expect(rights).to eq ["deposit", "get_info", "trade", "withdraw"]
+    end
+  end
+
   describe '#balance' do
     before do
       stub_post('/api/1/generic/info').
@@ -356,6 +370,43 @@ describe MtGox::Client do
       expect {
         @client.withdraw!(10000, "1KxSo9bGBfPVFEtWNLpnUK1bfLNNT4q31L")
       }.to raise_error(MtGox::FilthyRichError)
+    end
+  end
+
+  describe "nonce_type" do
+    before do
+      stub_post('/api/1/generic/bitcoin/address').
+        to_return(body: fixture('address.json'))
+    end
+
+    it "uses nonce by default" do
+      address = @client.address
+      expect(a_post('/api/1/generic/bitcoin/address').with(nonce: 1321745961249676)).to have_been_made
+    end
+
+    it "is capable of using tonce" do
+      @client.nonce_type = :tonce
+      address = @client.address
+      expect(a_post('/api/1/generic/bitcoin/address').with(tonce: 1321745961249676)).to have_been_made
+    end
+  end
+
+  describe "#order_result" do
+    context "for a valid order id" do
+      let(:order_id) { "Zda8917a-63d3-4415-b827-758408013691" }
+      let(:body) { test_body({"type" => "bid", "order" => order_id}) }
+
+      before do
+        stub_post('/api/1/generic/order/result').
+          with(body: body, headers: test_headers(@client, body)).
+          to_return(body: fixture('order_result.json'))
+      end
+
+      it "returns an order result" do
+        order_result = @client.order_result("bid", order_id)
+        expect(a_post("/api/1/generic/order/result").with(body: body, headers: test_headers(@client, body))).to have_been_made
+        expect(order_result.id).to eq order_id
+      end
     end
   end
 end
