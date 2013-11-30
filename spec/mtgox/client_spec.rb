@@ -460,4 +460,21 @@ describe MtGox::Client do
       end
     end
   end
+
+  describe "currency_name" do
+    context "a currency passed to it" do
+      it "returns BCTUSD"  do
+        currency_name = @client.send(:currency_name, "GBP")
+        expect(currency_name).to eq "BTCGBP"
+      end
+    end
+
+    context "no currency passed to it" do
+      it "returns BCTUSD" do
+        currency_name = @client.send(:currency_name)
+        expect(currency_name).to eq "BTCUSD"
+      end
+    end
+
+  end
 end

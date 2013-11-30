@@ -358,8 +358,13 @@ module MtGox
       OrderResult.new(post('/api/1/generic/order/result', {type: offer_type, order: order_id}))
     end
 
-      protected
-    # :usd => "#{currency}
+  protected
+
+    #Generates currency string
+    #either from input or from API call
+    #
+    #@example
+    #  BTCUSD
     def currency_name(symbol=nil)
       symbol ||= MtGox.currency
       "BTC#{symbol.upcase}"
